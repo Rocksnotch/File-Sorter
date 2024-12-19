@@ -7,7 +7,7 @@ import datetime as dt
 # Global Variables
 folder = ""
 file = ""
-fileTypes = [".png", ".jpg", ".jpeg", ".psd", ".txt"]
+fileTypes = [".png", ".jpg", ".jpeg", ".psd", ".txt", ".clip", ".gif"]
 
 
 # Functions
@@ -20,43 +20,48 @@ def errorBox(message):
     errorWindow.mainloop()
 
 def selectFolder():
-    global folder 
+    global folder
+    global file
+
     folder = fd.askdirectory()
     selectedLabel.config(text="Selected: " + folder)
 
+    file = ""
+
+
 def selectFile():
     global file
+    global folder
+    fileList = []
+
     file = fd.askopenfilenames()
     if len(file) == 1:
         selectedLabel.config(text="Selected: " + file[0])
-        print("File Type: " + os.path.splitext(file[0])[1])
     else:
         selectedLabel.config(text="Selected: " + str(len(file)) + " files")
 
-def renameFile(dateChoice):
+    folder = ""
+
+def renameFile():
     global folder
     global file
+    global dateChoice
+    fileList = []
+    renameList = []
 
     if not folder and not file:
         errorBox("Please select a file or folder.")
         return
-    elif folder:
-        print("Folder selected: " + folder)
-    elif file:
-        print("File selected: " + file[0])
 
     if not dateChoice:
         errorBox("Please select a date format.")
         return
-    elif dateChoice == 1:
-        print("Date format: MM-DD-YYYY")
-    elif dateChoice == 2:
-        print("Date format: DD-MM-YYYY")
+
 
     folder = ""
     file = ""
-
-    pass
+    selectedLabel.config(text="Selected: None")
+    dateChoice.set(None)
 
 # Main Window Configuration
 mainWindow = tk.Tk(className=" File Rename Tool")
@@ -93,20 +98,15 @@ intro2Label = Label(mainWindow, text="Please select the date format of the files
 
 # Main Window Date Choice Radio Buttons
 dateChoice = IntVar()
-Radiobutton(mainWindow, text="MM-DD-YYYY", variable=dateChoice, value=1).pack()
-Radiobutton(mainWindow, text="DD-MM-YYYY", variable=dateChoice, value=2).pack()
+mmddyyyy = Radiobutton(mainWindow, text="MM-DD-YYYY", variable=dateChoice, value=1)
+mmddyyyy.pack()
 
-intro3Label = Label(mainWindow, text="Please select the file type(s) you want to rename (all that apply)").pack()
-
-# Main Window File Type Checkboxes
-fileTypeCheckboxes = []
-for fileType in fileTypes:
-    fileTypeCheckboxes.append(IntVar())
-    Checkbutton(mainWindow, text=fileType, variable=fileTypeCheckboxes[-1]).pack()
+ddmmyyyy = Radiobutton(mainWindow, text="DD-MM-YYYY", variable=dateChoice, value=2)
+ddmmyyyy.pack()
 
 # Main Window Rename Button
 
-renameButton = Button(mainWindow, text="Rename", command=lambda: renameFile(dateChoice.get()))
+renameButton = Button(mainWindow, text="Rename", command=lambda: renameFile())
 renameButton.pack()
 
 
