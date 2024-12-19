@@ -32,7 +32,6 @@ def selectFolder():
 def selectFile():
     global file
     global folder
-    fileList = []
 
     file = fd.askopenfilenames()
     if len(file) == 1:
@@ -47,7 +46,6 @@ def renameFile():
     global file
     global dateChoice
     fileList = []
-    renameList = []
 
     if not folder and not file:
         errorBox("Please select a file or folder.")
@@ -57,11 +55,56 @@ def renameFile():
         errorBox("Please select a date format.")
         return
 
+    if folder:
+        fileList = os.listdir(folder)
 
-    folder = ""
-    file = ""
-    selectedLabel.config(text="Selected: None")
-    dateChoice.set(None)
+        for file in fileList:
+            if file.endswith(tuple(fileTypes)):
+                if dateChoice.get() == 1:
+                    date = dt.datetime.fromtimestamp(os.path.getmtime(folder + "/" + file)).strftime("%m-%d-%Y")
+                else:
+                    date = dt.datetime.fromtimestamp(os.path.getmtime(folder + "/" + file)).strftime("%d-%m-%Y")
+
+
+                new_name = date + os.path.splitext(file)[1]
+
+                try:
+                    os.rename(os.path.join(folder, file), os.path.join(folder, new_name))
+                except FileExistsError:
+                    base, extension = os.path.splitext(new_name)
+                    counter = 1
+                    new_name_with_counter = f"{base}-{counter}{extension}"
+                    while os.path.exists(os.path.join(folder, new_name_with_counter)):
+                        counter += 1
+                        new_name_with_counter = f"{base}-{counter}{extension}"
+                    os.rename(os.path.join(folder, file), os.path.join(folder, new_name_with_counter))
+        folder = ""
+        file = ""
+        fileList.clear()
+        selectedLabel.config(text="Selected: None")
+        
+    if file:
+        for f in file:
+            if dateChoice.get() == 1:
+                date = dt.datetime.fromtimestamp(os.path.getmtime(f)).strftime("%m-%d-%Y")
+            else:
+                date = dt.datetime.fromtimestamp(os.path.getmtime(f)).strftime("%d-%m-%Y")
+
+            new_name = date + os.path.splitext(f)[1]
+
+            try:
+                os.rename(f, os.path.join(os.path.dirname(f), new_name))
+            except FileExistsError:
+                base, extension = os.path.splitext(new_name)
+                counter = 1
+                new_name_with_counter = f"{base}-{counter}{extension}"
+                while os.path.exists(os.path.join(os.path.dirname(f), new_name_with_counter)):
+                    counter += 1
+                    new_name_with_counter = f"{base}-{counter}{extension}"
+                os.rename(f, os.path.join(os.path.dirname(f), new_name_with_counter))
+        folder = ""
+        file = ""
+        selectedLabel.config(text="Selected: None")
 
 # Main Window Configuration
 mainWindow = tk.Tk(className=" File Rename Tool")
